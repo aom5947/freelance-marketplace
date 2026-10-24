@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    font-feature-settings: 'ss01' on, 'cv11' on;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-[-0.025em] text-ink;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-paper;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1200px] px-5 sm:px-8;
+  }
+
+  .section {
+    @apply py-20 sm:py-24 lg:py-28;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-600;
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink/[0.07] bg-white shadow-soft;
+  }
+
+  .card-interactive {
+    @apply card transition duration-300 ease-out hover:-translate-y-1 hover:border-brand-200 hover:shadow-lift;
+  }
+
+  .text-gradient {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+  }
+
+  .text-gradient-soft {
+    background: linear-gradient(100deg, #c7d2fe 0%, #ffffff 45%, #ddd6fe 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .surface-grid {
+    background-image: theme('backgroundImage.grid-light');
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 30%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 30%, transparent 78%);
+  }
+
+  .surface-grid-dark {
+    background-image: theme('backgroundImage.grid-dark');
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, black 20%, transparent 80%);
+  }
+
+  .glass {
+    @apply border border-white/60 bg-white/75 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+
+  .hairline {
+    @apply border-b border-ink/[0.07];
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-semibold text-ink-700;
+  }
+
+  .field-control {
+    @apply w-full rounded-xl border border-ink/10 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-500/50 shadow-sm transition focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-paper;
+  }
+
+  .field-error {
+    @apply border-rose-300 focus:border-rose-400 focus:ring-rose-500/10;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1 text-xs font-medium text-ink-700 transition hover:border-brand-300 hover:text-brand-700;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(11, 16, 32, 0.18) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink/15;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-ink/[0.06];
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .balance {
+    text-wrap: balance;
+  }
+}
