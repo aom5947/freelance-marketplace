@@ -1,15 +1,15 @@
 {
   "name": "smart-contact",
   "version": "1.0.0",
-  "description": "Freelink escrow smart contract (Hardhat 3 + viem)",
+  "description": "Freelink escrow smart contract v2 (native ETH, Hardhat 3 + viem)",
   "main": "index.js",
   "scripts": {
     "build": "hardhat build",
     "test": "hardhat test",
     "typecheck": "hardhat build && tsc --noEmit",
     "export-abi": "hardhat build && hardhat run scripts/export-abi.ts",
-    "deploy:local": "hardhat ignition deploy ignition/modules/FreelinkDemo.ts",
-    "deploy:sepolia": "hardhat ignition deploy ignition/modules/FreelinkDemo.ts --network sepolia"
+    "deploy:local": "hardhat run scripts/deploy.ts",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia"
   },
   "keywords": [],
   "author": "",

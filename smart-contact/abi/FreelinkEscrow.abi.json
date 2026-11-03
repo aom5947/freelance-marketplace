@@ -3,11 +3,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "token_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "arbiter_",
         "type": "address"
       },
@@ -20,6 +15,26 @@
         "internalType": "uint16",
         "name": "feeBps_",
         "type": "uint16"
+      },
+      {
+        "internalType": "uint64",
+        "name": "reviewPeriod_",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "arbiterTimeout_",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "revisionPeriod_",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint8",
+        "name": "maxRevisions_",
+        "type": "uint8"
       }
     ],
     "stateMutability": "nonpayable",
@@ -28,6 +43,26 @@
   {
     "inputs": [],
     "name": "AlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ConflictOfInterest",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "DeadlinePassed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "DisputeNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "DisputeRequired",
     "type": "error"
   },
   {
@@ -52,7 +87,27 @@
   },
   {
     "inputs": [],
+    "name": "InvalidDuration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLimit",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidShare",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTerms",
     "type": "error"
   },
   {
@@ -93,19 +148,50 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ReviewPeriodActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReviewPeriodOver",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RevisionLimitReached",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "expected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sent",
+        "type": "uint256"
       }
     ],
-    "name": "SafeERC20FailedOperation",
+    "name": "WrongPayment",
     "type": "error"
   },
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldArbiter",
+        "type": "address"
+      },
       {
         "indexed": true,
         "internalType": "address",
@@ -122,13 +208,25 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
         "name": "openedBy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "arbiter",
         "type": "address"
       }
     ],
@@ -141,13 +239,37 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
         "indexed": false,
-        "internalType": "bool",
+        "internalType": "uint16",
+        "name": "freelancerBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "toFreelancer",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "toClient",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feePaid",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "byTimeout",
         "type": "bool"
       }
     ],
@@ -157,6 +279,31 @@
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "freelancer",
+        "type": "address"
+      }
+    ],
+    "name": "EscrowAccepted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      },
       {
         "indexed": true,
         "internalType": "bytes32",
@@ -170,7 +317,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "freelancer",
         "type": "address"
@@ -183,9 +330,21 @@
       },
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "uint64",
         "name": "deadline",
         "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "termsHash",
+        "type": "bytes32"
       }
     ],
     "name": "EscrowFunded",
@@ -197,7 +356,7 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
@@ -222,6 +381,12 @@
       {
         "indexed": false,
         "internalType": "uint16",
+        "name": "oldFeeBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
         "name": "newFeeBps",
         "type": "uint16"
       }
@@ -232,6 +397,12 @@
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldRecipient",
+        "type": "address"
+      },
       {
         "indexed": true,
         "internalType": "address",
@@ -267,7 +438,7 @@
       {
         "indexed": true,
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
@@ -297,8 +468,77 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PayoutDeferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "revisionNumber",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "newDeadline",
+        "type": "uint64"
+      }
+    ],
+    "name": "RevisionRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Withdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
@@ -312,10 +552,42 @@
         "internalType": "bytes32",
         "name": "workHash",
         "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "reviewEndsAt",
+        "type": "uint64"
       }
     ],
     "name": "WorkSubmitted",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BPS",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_DURATION",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -332,6 +604,50 @@
   },
   {
     "inputs": [],
+    "name": "MAX_REVISION_LIMIT",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TIMEOUT_FREELANCER_BPS",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "termsHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "acceptEscrow",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "arbiter",
     "outputs": [
       {
@@ -341,6 +657,56 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "arbiterTimeout",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "claimAfterReview",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "client",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "projectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "computeEscrowId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -356,19 +722,30 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
         "internalType": "uint64",
         "name": "deadline",
         "type": "uint64"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "termsHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "depositEscrow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -401,7 +778,7 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       }
     ],
@@ -420,9 +797,24 @@
             "type": "address"
           },
           {
+            "internalType": "address",
+            "name": "arbiter",
+            "type": "address"
+          },
+          {
             "internalType": "uint256",
             "name": "amount",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "termsHash",
+            "type": "bytes32"
           },
           {
             "internalType": "uint64",
@@ -430,14 +822,24 @@
             "type": "uint64"
           },
           {
+            "internalType": "uint64",
+            "name": "reviewEndsAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "disputedAt",
+            "type": "uint64"
+          },
+          {
             "internalType": "uint16",
-            "name": "feeBps",
+            "name": "payoutBps",
             "type": "uint16"
           },
           {
-            "internalType": "bool",
-            "name": "workSubmitted",
-            "type": "bool"
+            "internalType": "uint8",
+            "name": "revisionCount",
+            "type": "uint8"
           },
           {
             "internalType": "enum FreelinkEscrow.Status",
@@ -454,11 +856,29 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "maxRevisions",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
       }
     ],
     "name": "openDispute",
@@ -482,8 +902,51 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "pendingWithdrawals",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "quote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "total",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       }
     ],
@@ -496,7 +959,7 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       }
     ],
@@ -516,18 +979,62 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
-        "internalType": "bool",
-        "name": "toFreelancer",
-        "type": "bool"
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      }
+    ],
+    "name": "requestRevision",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "escrowId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint16",
+        "name": "freelancerBps",
+        "type": "uint16"
       }
     ],
     "name": "resolveDispute",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "reviewPeriod",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "revisionPeriod",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -573,7 +1080,20 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "projectId",
+        "name": "escrowId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "settleExpiredDispute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "escrowId",
         "type": "bytes32"
       },
       {
@@ -588,19 +1108,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "token",
-    "outputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -609,6 +1116,13 @@
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
