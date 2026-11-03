@@ -15,6 +15,7 @@ contracts/mocks/FreelancerMock.sol  จำลอง freelancer ที่เป�
 test/FreelinkEscrow.ts            เทสต์ 55 เคส (node:test + viem)
 scripts/deploy.ts                 deploy (อ่านค่าจาก env)
 scripts/export-abi.ts             ส่งออก ABI → abi/FreelinkEscrow.abi.json
+scripts/smoke-sepolia.ts          smoke test เดินกระบวนการจริงกับ contract ที่ deploy แล้ว
 docs/                             เอกสารออกแบบ
 ```
 
@@ -61,6 +62,20 @@ npm run deploy:local
 สคริปต์จะพิมพ์ `VITE_CHAIN_ID` และ `VITE_CONTRACT_ADDRESS` ให้นำไปใส่ใน `.env` ของ Frontend
 
 > `reviewPeriod`, `arbiterTimeout`, `revisionPeriod` และ `maxRevisions` เป็น `immutable` แก้ไม่ได้หลัง deploy ตกลงค่ากับทีมก่อน (ดูหัวข้อ 10 ในเอกสาร)
+
+### Smoke test บน Sepolia
+
+เดินกระบวนการจริง 3 เส้นทาง (ปล่อยเงิน / ขอแก้งาน / ข้อพิพาท) ด้วย ETH ยอดจิ๋ว กับ contract ที่ deploy แล้ว:
+
+```shell
+npm run smoke:local                              # ซ้อมในเครื่องก่อน (deploy contract ใหม่ให้เอง)
+ESCROW_ADDRESS=0x... npm run smoke:sepolia       # PowerShell: $env:ESCROW_ADDRESS="0x..."; npm run smoke:sepolia
+```
+
+- สคริปต์สร้างกระเป๋า client/freelancer ชั่วคราว โอน ETH จาก deployer ไปให้ แล้วโอนที่เหลือกลับตอนจบ (deployer ต้องมี ETH ราว 0.011)
+- เส้นทางข้อพิพาทต้องให้ deployer เป็น arbiter ถ้าไม่ใช่จะถูกข้าม
+- ไม่ครอบคลุมเส้นทางที่ต้องรอเวลา (reviewPeriod / arbiterTimeout / deadline) ส่วนนั้นพึ่ง `npm test`
+- RPC สาธารณะอาจตอบค่าล้าหลังหรือ error ชั่วคราว สคริปต์อ่านค่า ณ block ของธุรกรรมและส่งซ้ำให้เอง
 
 Verify บน Etherscan (ยังไม่ได้ลองกับ Etherscan จริง):
 
