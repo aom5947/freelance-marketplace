@@ -1,54 +1,69 @@
 /**
- * Smart-contract configuration.
+ * Smart-contract configuration — FreelinkEscrow v2 (native ETH).
  *
- * Everything in this file is a PLACEHOLDER until the Solidity teammate delivers:
- *  - deployed contract address
- *  - ABI (copy the compiled JSON here or import from a generated artifact)
- *  - target chain id / network name
- *  - escrow function names + parameters
- *  - event definitions
- *  - token or native currency details
+ * The ABI is a copy of `smart-contact/abi/FreelinkEscrow.abi.json`. When the
+ * contract changes, run `npm run export-abi` in `smart-contact/` and copy the
+ * file over again.
  *
- * Creating a wallet connection does NOT mean payments work. Contract calls must
- * stay disabled until `isContractConfigured()` returns true.
+ * Address and chain id come from `.env` (VITE_CONTRACT_ADDRESS / VITE_CHAIN_ID).
+ * Creating a wallet connection does NOT mean payments work. Contract calls stay
+ * disabled until `isContractConfigured()` returns true.
  */
+import abi from './FreelinkEscrow.abi.json'
+
 const env = import.meta.env
 
-export const contractConfig = {
-  // TODO(contract): chain id, e.g. 11155111 (Sepolia) or 31337 (local anvil/hardhat)
-  chainId: env.VITE_CHAIN_ID ? Number(env.VITE_CHAIN_ID) : null,
-  chainName: null, // TODO(contract): human-readable network name
+const CHAIN_NAMES = {
+  1: 'Ethereum Mainnet',
+  11155111: 'Sepolia',
+  31337: 'Hardhat (local)',
+}
 
-  // TODO(contract): deployed escrow contract address
+const chainId = env.VITE_CHAIN_ID ? Number(env.VITE_CHAIN_ID) : null
+
+// THB per 1 ETH. Product decision pending (BACKEND_START_ver_0_2.md, section 4.5):
+// a fixed rate from .env is the interim approach. Never convert with floats — see thbToWei().
+const thbPerEth = env.VITE_THB_PER_ETH ? Number(env.VITE_THB_PER_ETH) : null
+
+export const contractConfig = {
+  chainId,
+  chainName: env.VITE_CHAIN_NAME || (chainId ? CHAIN_NAMES[chainId] || `Chain ${chainId}` : null),
+
   contractAddress: env.VITE_CONTRACT_ADDRESS || null,
 
-  // TODO(contract): paste the ABI delivered by the contract teammate.
-  // Example shape:
-  // abi: [{ type: 'function', name: '...', inputs: [...], outputs: [...] }],
-  abi: null,
+  abi,
 
-  // TODO(contract): the escrow currency agreed with the team.
-  // Could be native currency (ETH/MATIC) or an ERC-20 token address.
+  // v2 escrows native ETH (no ERC-20 approve step).
   currency: {
-    type: null, // 'native' | 'erc20' | null
-    symbol: null,
+    type: 'native',
+    symbol: 'ETH',
     address: null,
     decimals: 18,
   },
 
-  // TODO(contract): confirm these names once the contract ABI is available.
+  thbPerEth: Number.isFinite(thbPerEth) && thbPerEth > 0 ? thbPerEth : null,
+
+  // Keys are what the UI calls, values are the Solidity function names.
   methods: {
-    depositEscrow: null,
-    releasePayment: null,
-    refundClient: null,
-    getEscrow: null,
-    openDispute: null,
+    depositEscrow: 'depositEscrow',
+    acceptEscrow: 'acceptEscrow',
+    submitWork: 'submitWork',
+    releasePayment: 'releasePayment',
+    requestRevision: 'requestRevision',
+    claimAfterReview: 'claimAfterReview',
+    refundClient: 'refundClient',
+    openDispute: 'openDispute',
+    settleExpiredDispute: 'settleExpiredDispute',
+    withdraw: 'withdraw',
+    getEscrow: 'getEscrow',
+    quote: 'quote',
+    computeEscrowId: 'computeEscrowId',
   },
 
   explorerUrl: env.VITE_EXPLORER_URL || null,
 }
 
-/** True only when address, chain id and ABI have all been delivered. */
+/** True only when address, chain id and ABI have all been provided. */
 export function isContractConfigured() {
   return Boolean(
     contractConfig.contractAddress &&
@@ -61,10 +76,9 @@ export function isContractConfigured() {
 /** Human-readable list of what is still missing, used by the wallet/escrow UI. */
 export function getMissingContractConfig() {
   const missing = []
-  if (!contractConfig.contractAddress) missing.push('Contract Address')
-  if (!contractConfig.chainId) missing.push('Network / Chain ID')
+  if (!contractConfig.contractAddress) missing.push('Contract Address (VITE_CONTRACT_ADDRESS)')
+  if (!contractConfig.chainId) missing.push('Network / Chain ID (VITE_CHAIN_ID)')
   if (!Array.isArray(contractConfig.abi) || contractConfig.abi.length === 0) missing.push('Contract ABI')
-  if (!contractConfig.currency.type) missing.push('Escrow Currency (native หรือ ERC-20)')
-  if (!contractConfig.methods.depositEscrow) missing.push('Escrow Function Names & Parameters')
+  if (!contractConfig.thbPerEth) missing.push('อัตราแลกเปลี่ยน บาท/ETH (VITE_THB_PER_ETH)')
   return missing
 }

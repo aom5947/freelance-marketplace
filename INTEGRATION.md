@@ -46,7 +46,10 @@ VITE_GOOGLE_CLIENT_ID=
 VITE_CHAIN_ID=
 VITE_CONTRACT_ADDRESS=
 VITE_EXPLORER_URL=
+VITE_THB_PER_ETH=
 ```
+
+> ส่วน Smart Contract ต่อกับ FreelinkEscrow v2 (native ETH) แล้ว ABI อยู่ที่ `src/config/FreelinkEscrow.abi.json` (สำเนาจาก `smart-contact/abi/`) และ `.env.example` มีค่าของ Sepolia testnet ให้ ส่วน `VITE_THB_PER_ETH` คืออัตราคงที่บาทต่อ 1 ETH (ข้อตกลงชั่วคราว ว่าง = ฝากเงินไม่ได้)
 
 - `VITE_*` ถูกฝังใน browser ทั้งหมด → **ห้ามใส่ secret**
 - ค่า `VITE_USE_MOCK_API=true` คือค่าเริ่มต้น; จะเปลี่ยนเป็น `false` เมื่อ API พร้อมและทดสอบแล้วเท่านั้น
@@ -230,7 +233,7 @@ explorerUrl
 - ไม่มีการรายงานธุรกรรมสำเร็จหากไม่ได้รับ hash จาก wallet จริง
 
 ### สิ่งที่ต้องยืนยัน
-- [ ] ลำดับเรียก: `approve` (ถ้า ERC-20) → `depositEscrow`
+- [x] ลำดับเรียก: v2 ใช้ native ETH ไม่มี `approve` → `depositEscrow` พร้อมแนบ `quote(amount).total`
 - [ ] หน่วยเงินและ decimals
 - [ ] ใครเรียก `releasePayment` ได้ (client / platform / multisig)
 - [ ] เงื่อนไข `refundClient` และ dispute
