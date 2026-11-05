@@ -28,7 +28,7 @@ import { WalletConnectButton } from '@/components/wallet/WalletConnectButton'
 import { TransactionStatus } from '@/components/wallet/TransactionStatus'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { InfoBanner } from '@/components/common/InfoBanner'
-
+import { EmptyState } from '@/components/common/EmptyState'
 import { ErrorState } from '@/components/common/ErrorState'
 import { PageLoader } from '@/components/common/LoadingSkeleton'
 import { escrowStatus } from '@/constants'
